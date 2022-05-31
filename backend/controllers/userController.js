@@ -18,7 +18,8 @@ const loginUser =  asyncHandler(async(req, res) => {
         res.status(201).json({
             _id: user.id,
             name: user.name,
-            email: user.email
+            email: user.email,
+            token: generateToken(user._id)
         })
     }else {
         res.status(400)
@@ -28,10 +29,15 @@ const loginUser =  asyncHandler(async(req, res) => {
 
 //@desc get user
 //@route get /api/users/me
-//@acces Public
+//@acces private
 
 const getUser =  asyncHandler(async(req, res) => {
-    res.send('Hi')
+    const {_id, name, email} = await User.findById(req.user.id)
+    res.status(200).json({
+        id: _id,
+        name,
+        email
+    })
 })
 
 //@desc register a new user
@@ -68,7 +74,8 @@ const registerUser =  asyncHandler(async(req, res) => {
             res.status(201).json({
                 _id: user.id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                token: generateToken(user._id)
             })
         }else{
             res.status(400)
@@ -78,7 +85,13 @@ const registerUser =  asyncHandler(async(req, res) => {
     }
 })
 
+//generate token jwt
 
+const generateToken =(id) =>{
+    return jwt.sign({id}, process.env.JWT_SECRET,{
+        expiresIn: '48h'
+    })
+}
 
 module.exports = {
     loginUser,
